@@ -1,0 +1,184 @@
+* {
+    padding: 0;
+    margin: 0;
+    font-family: 'Ubuntu', sans-serif;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 5px;
+}
+
+.link {
+    text-decoration: none;
+    color: #1976D2;
+}
+
+.github-img {
+    height: 24px;
+    margin-left: 5px;
+}
+
+.link.github {
+    font-size: 20px;
+    color: black;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-item {
+    padding: 5px 5px;
+}
+
+.link.github:hover {
+    background: #E0E0E0;
+    box-shadow: inset -5px -5px 0 -3px #212121;
+}
+
+.version-span {
+    font-size: 12px;
+    background: orange;
+    padding: 3px;
+    color: white;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    font-family: 'Ubuntu', sans-serif;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 5px;
+    border-bottom: 2px solid;
+}
+
+.link {
+    text-decoration: none;
+    color: #1976D2;
+}
+
+.github-img {
+    height: 24px;
+    margin-left: 5px;
+}
+
+.link.github {
+    font-size: 20px;
+    color: black;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-item {
+    padding: 5px 5px;
+}
+
+.link.github:hover {
+    background: #E0E0E0;
+    box-shadow: inset -5px -5px 0 -3px #212121;
+}
+
+.version-span {
+    font-size: 12px;
+    background: orange;
+    padding: 3px;
+    color: white;
+}
+
+.options-menu {
+    display: flex;
+    padding: 5px 5px;
+    justify-content: space-between;
+    border-bottom: 2px solid;
+}
+
+.option-item {
+    margin: 0 5px;
+}
+
+.dropdown-select {
+    border: none;
+    background: none;
+    padding: 5px;
+    font-size: 16px;
+    box-shadow: inset 0px 0px 0 1px black;
+}
+
+.dropdown-select:hover {
+    cursor: pointer;
+}
+
+.dropdown-select:focus {
+    outline: none;
+    box-shadow: inset -1px -2px 0 0 #03A9F4;
+}
+
+#start-button {
+    padding: 5px 8px;
+    background: #8BC34A;
+    color: white;
+    font-weight: bold;
+    transition: .2s;
+}
+
+#start-button:hover {
+    cursor: pointer;
+    background: #4CAF50;
+}
+
+#start-button:active {
+    transform: translateY(2px);
+}
+
+.options-container {
+    display: inherit;
+}
+
+.maze-container {
+    max-height: 750px;
+    height: 750px;
+}
+
+.maze-node {
+    width: 25px;
+    height: 25px;
+    box-sizing: border-box;
+    border: 1px solid;
+}
+
+#maze-canvas {
+    border-collapse: collapse;
+    margin: 10px auto;
+}
+
+.start {
+    background: url('../img/start.png');
+}
+
+.end {
+    background: url('../img/target.png');
+}
+
+.wall {
+    background: #424242;
+}
+
+.visited {
+    background: purple;
+}
+
+.seen {
+    background: yellow;
+}
+
+.path {
+    background: #8BC34A;
+}

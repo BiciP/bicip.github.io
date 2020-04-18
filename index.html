@@ -1,1 +1,48 @@
-Hello World
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A pathfinding algorith visualizer. Visualize Dijkstra, A* and many more pathfinding algorithms.">
+    <title>BiciP's pathfinding visualizer</title>
+
+    <!-- CSS -->
+    <link href="public/css/main.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- JS -->
+    <script src="public/js/functions.js"></script>
+    <script src="public/js/astar.js"></script>
+
+    <script src="public/js/bundle.js"></script>
+    <script src="public/js/index.js" defer></script>
+</head>
+<body>
+<div class="main-wrapper">
+    <div class="nav-container">
+        <nav>
+            <h1 class="page-title nav-item">Pathfinding visualizer <span class="version-span">v0.0.1</span></h1>
+            <a href="https://github.com/bicip/bicip.github.io" class="link github nav-item" target="_blank">GitHub <img class="img github-img" src="public/img/github.png"></a>
+        </nav>
+        <div class="options-menu">
+            <div class="options-container">
+                <div class="option-item">
+                    <select class="dropdown-select" id="algorithm">
+                        <option value="astar" selected>A*</option>
+                    </select>
+                </div>
+                <div class="option-item">
+                    <select class="dropdown-select">
+                        <option selected>Fast</option>
+                    </select>
+                </div>
+            </div>
+            <div id="start-button">Visualize!</div>
+        </div>
+    </div>
+    <div class="maze-container">
+        <table id="maze-canvas"></table>
+    </div>
+</div>        
+</body>
+</html>
