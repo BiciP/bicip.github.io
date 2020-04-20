@@ -37,6 +37,8 @@ function initAStar(start, end, nodes) {
             `${q.x}_${q.y-1}`,
         ];
 
+        visitNode(q);
+
         for (const nId of neighbourIds) {
             if (nodes[nId] && nodes[nId].type === 1) {
                 let neighbour = new AStarNode(nId.split('_')[0], nId.split('_')[1], q, end);
@@ -54,8 +56,6 @@ function initAStar(start, end, nodes) {
                 }
             }
         }
-
-        visitNode(q);
     }
 
     return steps;

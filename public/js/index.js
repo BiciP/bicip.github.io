@@ -31,6 +31,10 @@ class Maze {
 
             for (let x = 0; x < this.width; x++) {
                 const td = document.createElement('td');
+                const span = document.createElement('span');
+
+                span.classList.value = 'node-span';
+
                 td.setAttribute('nodeId', x+'_'+y);
                 td.classList.value = 'maze-node unknown';
 
@@ -38,6 +42,7 @@ class Maze {
                 td.addEventListener('mouseup', (e)=>{self.onMouseUp(e, self)});
                 td.addEventListener('mouseenter', (e)=>{self.onMouseEnterNode(e, self)});
 
+                td.appendChild(span);
                 tr.appendChild(td);
                 this.nodes[x+'_'+y] = {
                     x, y,
@@ -51,7 +56,13 @@ class Maze {
 
     onMouseDown(e, self) {
         self.isMouseDown = true;
-        self.transformNode(e.currentTarget.getAttribute('nodeid'));
+        if (e.currentTarget.classList.value.indexOf('start') !== -1) {
+            /* This is the starting node */
+            self.movingStartingNode = true;
+            e.currentTarget.classList.value = 'start maze-node grabbed';
+        } else {
+            self.transformNode(e.currentTarget.getAttribute('nodeid'));
+        }
     }
     
     onMouseUp(e, self) {
@@ -88,17 +99,30 @@ window.onload = () => {
 
     function visualize(e) {
         const alg = document.getElementById('algorithm').value;
+        const speed = parseInt(document.getElementById('speed').value);
         
-        console.time();
+        const timeStart = Date.now();
         const steps = algorithm[alg](maze.nodes[maze.startNodeId], maze.nodes[maze.endNodeId], maze.nodes);
-        console.timeEnd();
-        animate(steps, 10);
+        const timeEnd = Date.now() - timeStart;
+        console.log(`Finished processing in ${timeEnd}ms.`);
+        animate(steps, speed);
     }
 }
 
 function animate(steps, time, index = 0) {
     if (steps[index]) {
-        document.querySelector(`[nodeid="${steps[index].node}"]`).classList.value = steps[index].type + ' maze-node';
+        let node = document.querySelector(`[nodeid="${steps[index].node}"]`);
+
+        if (node.classList.value.indexOf('start') === -1 && node.classList.value.indexOf('end') === -1) {
+            let span = node.getElementsByTagName('span')[0];
+            let clone = span.cloneNode(true);
+        
+            span.parentElement.replaceChild(clone, span);
+
+            node.classList.value = steps[index].type + ' maze-node';
+            span.classList.value = 'node-span';
+        }
+    
         setTimeout(animate, time, steps, time, index+1);
     } else {
         console.log('finished animation');
