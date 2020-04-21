@@ -2,8 +2,8 @@ class Maze {
 
     constructor() {
         this.canvas = document.getElementById('maze-canvas');
-        this.width = Math.floor(this.canvas.parentElement.clientWidth / 25);
-        this.height = Math.floor(this.canvas.parentElement.clientHeight / 25);
+        this.width = Math.floor(this.canvas.parentElement.clientWidth / 35);
+        this.height = Math.floor(this.canvas.parentElement.clientHeight / 35);
         this.nodes = {};
         
         this.drawCanvasNodes();
@@ -58,15 +58,31 @@ class Maze {
         self.isMouseDown = true;
         if (e.currentTarget.classList.value.indexOf('start') !== -1) {
             /* This is the starting node */
-            self.movingStartingNode = true;
+            self.movingStartNode = e.currentTarget.getAttribute('nodeid');
             e.currentTarget.classList.value = 'start maze-node grabbed';
+        } else if (e.currentTarget.classList.value.indexOf('end') !== -1) {
+            /* This is the end node */
+            self.movingEndNode = e.currentTarget.getAttribute('nodeid');
+            e.currentTarget.classList.value = 'end maze-node grabbed';
         } else {
-            self.transformNode(e.currentTarget.getAttribute('nodeid'));
+            self.transformNode(e.currentTarget.getAttribute('nodeid'), self);
         }
     }
     
     onMouseUp(e, self) {
         self.isMouseDown = false;
+        
+        if (self.movingStartNode) {
+            const elem = document.querySelector(`[nodeid="${self.movingStartNode}"]`);
+            elem.classList.value = 'maze-node start';
+            self.movingStartNode = false;
+        }
+
+        if (self.movingEndNode) {
+            const elem = document.querySelector(`[nodeid="${self.movingEndNode}"]`);
+            elem.classList.value = 'maze-node end';
+            self.movingEndNode = false;
+        }
     }
     
     onMouseEnterNode(e, self) {
@@ -78,6 +94,37 @@ class Maze {
     transformNode(id) {
         const node = this.nodes[id];
         const elem = document.querySelector(`[nodeid="${id}"]`);
+
+        if (this.movingStartNode) {
+            const old = document.querySelector(`[nodeid="${this.movingStartNode}"]`);
+            const oldNode = this.nodes[this.movingStartNode];
+
+            oldNode.type = 1;
+            delete oldNode.id;
+            old.classList.value = 'maze-node unknown';
+
+            elem.classList.value = 'maze-node start grabbed';
+            this.movingStartNode = id;
+            this.startNodeId = id;
+            node.id = id;
+            return;
+        } else if (this.movingEndNode) {
+            const old = document.querySelector(`[nodeid="${this.movingEndNode}"]`);
+            const oldNode = this.nodes[this.movingEndNode];
+
+            oldNode.type = 1;
+            delete oldNode.id;
+            old.classList.value = 'maze-node unknown';
+
+            elem.classList.value = 'maze-node end grabbed';
+            this.movingEndNode = id;
+            this.endNodeId = id;
+            node.id = id;
+            return;
+        }
+
+        if (id === this.startNodeId || id === this.endNodeId) return;
+
         if (node.type === 1) {
             // Create a wall
             elem.classList.value = 'maze-node wall';

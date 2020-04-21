@@ -148,8 +148,8 @@ nav {
 }
 
 .maze-node {
-    width: 25px;
-    height: 25px;
+    width: 35px;
+    height: 35px;
     box-sizing: border-box;
     border: 1px solid #757575;
     position: relative;
@@ -168,6 +168,10 @@ nav {
     color: #F44336;
 }
 
+.start:hover, .end:hover {
+    cursor: move;
+}
+
 .wall {
     color: #616161;
 }
@@ -182,6 +186,11 @@ nav {
 
 .path {
     color: #9CCC65;
+}
+
+.grabbed .node-span {
+    width: 65% !important;
+    height: 65% !important;
 }
 
 .start .node-span, .end .node-span {
