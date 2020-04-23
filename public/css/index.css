@@ -1,0 +1,71 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+}
+
+.maze-container {
+    max-height: 750px;
+    height: 750px;
+}
+
+.maze-node {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #616161;
+    box-sizing: border-box;
+    position: relative;
+
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+  
+#maze-canvas {
+    border-collapse: collapse;
+    margin: auto;
+    box-shadow: 0 0 10px 2px #BDBDBD;
+}
+
+.node-span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+[type="wall"] .node-span {
+    background: #424242;
+    animation: nodeChange 200ms forwards ease-out;
+}
+
+[type="start"] .node-span {
+    background: #66BB6A;
+    width: 100%;
+    height: 100%;
+}
+
+[type="end"] .node-span {
+    background: #E53935;
+    width: 100%;
+    height: 100%;
+}
+
+[type="visited"] .node-span {
+    background: #29B6F6;
+    animation: nodeChange 200ms forwards;
+}
+
+[type="seen"] .node-span {
+    background: #BDBDBD;
+    animation: nodeChange 200ms forwards;
+}
+
+[type="path"] .node-span {
+    background: #9CCC65;
+    animation: nodeChange 200ms forwards;
+}

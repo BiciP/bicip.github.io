@@ -1,3 +1,0 @@
-const algorithm = {
-    astar: initAStar
-};
