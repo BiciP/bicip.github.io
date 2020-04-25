@@ -412,7 +412,7 @@ window.onload = function () {
     clear.addEventListener('click', clearCanvas);
     function clearCanvas() {
         var nodes = document.getElementsByClassName('maze-node');
-        for (var i = 0; i < nodes.length - 1; i++) {
+        for (var i = 0; i < nodes.length; i++) {
             var type = nodes[i].getAttribute('type');
             if (['start', 'end', 'wall'].indexOf(type) === -1) {
                 nodes[i].setAttribute('type', 'unknown');
