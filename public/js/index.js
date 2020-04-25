@@ -18,6 +18,7 @@ var Maze = /** @class */ (function () {
         this.mouseDown = false;
         this.algorithm = {
             astar: AStar,
+            dijkstra: Dijkstra,
         };
         var _this = this;
         this.canvas = document.getElementById('maze-canvas');
@@ -135,24 +136,36 @@ var Maze = /** @class */ (function () {
  * Maze node superclass
  */
 var MazeNode = /** @class */ (function () {
-    function MazeNode(id) {
+    function MazeNode(id, parent) {
         this.id = id;
         this.x = parseInt(id.split("_")[0]);
         this.y = parseInt(id.split("_")[1]);
+        this.parent = parent;
     }
     return MazeNode;
 }());
+/**
+ * Dijkstra node
+ */
+var DijkstraNode = /** @class */ (function (_super) {
+    __extends(DijkstraNode, _super);
+    function DijkstraNode(id, parent, g) {
+        var _this_1 = _super.call(this, id, parent) || this;
+        _this_1.g = g;
+        return _this_1;
+    }
+    return DijkstraNode;
+}(MazeNode));
 /**
  * A* Node for A* algorithm
  */
 var AStarNode = /** @class */ (function (_super) {
     __extends(AStarNode, _super);
     function AStarNode(id, g, h, parent) {
-        var _this_1 = _super.call(this, id) || this;
+        var _this_1 = _super.call(this, id, parent) || this;
         _this_1.g = g;
         _this_1.h = h;
         _this_1.f = _this_1.g + _this_1.h;
-        _this_1.parent = parent;
         return _this_1;
     }
     return AStarNode;
@@ -161,10 +174,11 @@ var AStarNode = /** @class */ (function (_super) {
  * Algorithm superclass
  */
 var Algorithm = /** @class */ (function () {
-    function Algorithm(maze, start) {
+    function Algorithm(maze, start, end) {
         this.steps = [];
         this.maze = maze;
         this.startNode = start;
+        this.endNode = end;
     }
     Algorithm.prototype.start = function () {
         throw new Error('This algorithm does not have a start method.');
@@ -181,7 +195,7 @@ var Algorithm = /** @class */ (function () {
             var id = ids_1[_i];
             if (!this.isValidId(id))
                 continue;
-            neighbours.push(new MazeNode(id));
+            neighbours.push(new MazeNode(id, node.id));
         }
         return neighbours;
     };
@@ -198,10 +212,99 @@ var Algorithm = /** @class */ (function () {
     };
     return Algorithm;
 }());
+var Dijkstra = /** @class */ (function (_super) {
+    __extends(Dijkstra, _super);
+    function Dijkstra(maze, start, end) {
+        var _this_1 = _super.call(this, maze, start, end) || this;
+        _this_1.closed = {};
+        _this_1.open = {};
+        return _this_1;
+    }
+    Dijkstra.prototype.start = function () {
+        this.ttc = Date.now();
+        // Initialize the closed list
+        for (var nodeId in this.maze) {
+            if (this.maze.hasOwnProperty(nodeId)) {
+                this.closed[nodeId] = new DijkstraNode(nodeId, null, Infinity);
+            }
+        }
+        this.closed[this.startNode].g = 0;
+        this.open[this.startNode] = this.closed[this.startNode];
+        while (Object.keys(this.open).length > 0) {
+            var Q = this.findBestNode();
+            delete this.open[Q.id];
+            // Loop through Q's neighbours
+            for (var _i = 0, _a = this.getNodeNeighbours(Q); _i < _a.length; _i++) {
+                var node = _a[_i];
+                if (node.id === this.endNode) {
+                    // We found the end.. Wrap it up
+                    node.parent = Q.id;
+                    this.ttc = Date.now() - this.ttc;
+                    this.finish();
+                    return this.steps;
+                }
+                else if (node.g === Infinity) {
+                    node.parent = Q.id;
+                    node.g = Q.g + this.maze[node.id];
+                    this.open[node.id] = node;
+                }
+            }
+        }
+        this.ttc = Date.now() - this.ttc;
+        return this.steps;
+    };
+    Dijkstra.prototype.finish = function () {
+        var id = this.endNode;
+        var path = [];
+        do {
+            var node = this.closed[id];
+            path.push({ id: id, type: 'path' });
+            id = node.parent;
+        } while (id);
+        path = path.reverse();
+        this.steps = this.steps.concat(path);
+    };
+    Dijkstra.prototype.getNodeNeighbours = function (node) {
+        var ids = [
+            node.x + 1 + "_" + node.y,
+            node.x - 1 + "_" + node.y,
+            node.x + "_" + (node.y + 1),
+            node.x + "_" + (node.y - 1),
+        ];
+        var neighbours = [];
+        for (var _i = 0, ids_2 = ids; _i < ids_2.length; _i++) {
+            var id = ids_2[_i];
+            if (!this.isValidId(id))
+                continue;
+            neighbours.push(this.closed[id]);
+        }
+        return neighbours;
+    };
+    Dijkstra.prototype.findBestNode = function () {
+        var minValue = Infinity;
+        var minNode = null;
+        for (var id in this.open) {
+            if (!this.open.hasOwnProperty(id))
+                throw new Error("Element with ID " + id + " is not in the open list.");
+            var node = this.open[id];
+            if (node.g > minValue)
+                continue;
+            minValue = node.g;
+            minNode = node;
+        }
+        this.visitNode(minNode);
+        return minNode;
+    };
+    Dijkstra.prototype.visitNode = function (node) {
+        this.closed[node.id] = node;
+        this.steps.push({ id: node.id, type: 'visited' });
+    };
+    return Dijkstra;
+}(Algorithm));
 var AStar = /** @class */ (function (_super) {
     __extends(AStar, _super);
     function AStar(maze, start, end) {
-        var _this_1 = _super.call(this, maze, start) || this;
+        var _this_1 = _super.call(this, maze, start, end) || this;
         _this_1.open = {};
         _this_1.closed = {};
         _this_1.endNode = new AStarNode(end, 1, 0, null);
@@ -262,8 +365,7 @@ var AStar = /** @class */ (function (_super) {
             bestH: Infinity,
             node: null,
         };
-        for (var _i = 0, _a = Object.keys(this.open); _i < _a.length; _i++) {
-            var id = _a[_i];
+        for (var id in this.open) {
             var node = this.open[id];
             if (node.f < bestNode.bestF || // F is lower
                 (node.f === bestNode.bestF && node.h < bestNode.bestH)) { // or F is equal and H is lower
@@ -283,8 +385,8 @@ var AStar = /** @class */ (function (_super) {
             node.x + "_" + (node.y - 1),
         ];
         var neighbours = [];
-        for (var _i = 0, ids_2 = ids; _i < ids_2.length; _i++) {
-            var id = ids_2[_i];
+        for (var _i = 0, ids_3 = ids; _i < ids_3.length; _i++) {
+            var id = ids_3[_i];
             if (!this.isValidId(id))
                 continue;
             neighbours.push(new AStarNode(id, node.g + 1, this.getHeuristic(id), node.id));
@@ -305,13 +407,27 @@ var AStar = /** @class */ (function (_super) {
 window.onload = function () {
     var maze = new Maze();
     var start = document.getElementById('start-btn');
+    var clear = document.getElementById('clear-btn');
     start.addEventListener('click', visualize);
-    function visualize(e) {
+    clear.addEventListener('click', clearCanvas);
+    function clearCanvas() {
+        var nodes = document.getElementsByClassName('maze-node');
+        for (var i = 0; i < nodes.length - 1; i++) {
+            var type = nodes[i].getAttribute('type');
+            if (['start', 'end', 'wall'].indexOf(type) === -1) {
+                nodes[i].setAttribute('type', 'unknown');
+            }
+        }
+    }
+    function visualize() {
+        clearCanvas();
         var SA = document.getElementById('selected-algorithm');
+        var speed = document.getElementById('anim-speed');
+        speed = parseInt(speed.value);
         var alg = new maze.algorithm[SA.value](maze.nodes, maze.startNode, maze.endNode);
         var steps = alg.start();
         console.log(alg.ttc + 'ms');
-        steps.forEach(animate(showStep, 50));
+        steps.forEach(animate(showStep, speed));
     }
 };
 function showStep(step) {

@@ -11,6 +11,7 @@ class Maze {
     movingEndNode: any;
     algorithm: object = {
         astar: AStar,
+        dijkstra: Dijkstra,
     };
 
     constructor() {
@@ -149,11 +150,25 @@ class MazeNode {
     x: number;
     y: number;
     id: string;
+    parent: string;
 
-    constructor(id: string) {
+    constructor(id: string, parent: string) {
         this.id = id;
         this.x = parseInt(id.split("_")[0]);
         this.y = parseInt(id.split("_")[1]);
+        this.parent = parent;
+    }
+}
+
+/**
+ * Dijkstra node
+ */
+class DijkstraNode extends MazeNode {
+    g: number;
+
+    constructor(id: string, parent: string, g: number) {
+        super(id, parent);
+        this.g = g;
     }
 }
 
@@ -161,20 +176,16 @@ class MazeNode {
  * A* Node for A* algorithm
  */
 class AStarNode extends MazeNode {
-    id: string;
-    x: number;
-    y: number;
     h: number;
     g: number;
     f: number;
     parent: string;
 
     constructor(id: string, g: number, h: number, parent: string) {
-        super(id);
+        super(id, parent);
         this.g = g;
         this.h = h;
         this.f = this.g + this.h;
-        this.parent = parent;
     }
 }
 
@@ -185,11 +196,14 @@ class AStarNode extends MazeNode {
 class Algorithm {
     maze: object;
     startNode: any;
+    endNode: any;
     steps: Array<object> = [];
+    ttc: number;
 
-    constructor(maze: object, start: any) {
+    constructor(maze: object, start: any, end: any) {
         this.maze = maze;
         this.startNode = start;
+        this.endNode = end;
     }
 
     start() {
@@ -208,7 +222,7 @@ class Algorithm {
 
         for (const id of ids) {
             if (!this.isValidId(id)) continue;
-            neighbours.push(new MazeNode(id));
+            neighbours.push(new MazeNode(id, node.id));
         }
 
         return neighbours;
@@ -228,6 +242,107 @@ class Algorithm {
     }
 }
 
+class Dijkstra extends Algorithm {
+    closed: object = {};
+    open: object = {};
+
+    constructor(maze: object, start: string, end: string) {
+        super(maze, start, end);
+    }
+
+    start() {
+        this.ttc = Date.now();
+
+        // Initialize the closed list
+        for (const nodeId in this.maze) {
+            if (this.maze.hasOwnProperty(nodeId)) {
+                this.closed[nodeId] = new DijkstraNode(nodeId, null, Infinity);
+            }
+        }
+
+        this.closed[this.startNode].g = 0;
+        this.open[this.startNode] = this.closed[this.startNode];
+
+        while(Object.keys(this.open).length > 0) {
+            const Q: DijkstraNode = this.findBestNode();
+            delete this.open[Q.id];
+
+            // Loop through Q's neighbours
+            for (const node of this.getNodeNeighbours(Q)) {
+                if (node.id === this.endNode) {
+                    // We found the end.. Wrap it up
+                    node.parent = Q.id;
+                    this.ttc = Date.now() - this.ttc;
+                    this.finish();
+                    return this.steps;
+                } else if (node.g === Infinity) {
+                    node.parent = Q.id;
+                    node.g = Q.g + this.maze[node.id];
+                    this.open[node.id] = node;
+                }
+            }
+        }
+
+        this.ttc = Date.now() - this.ttc;
+        return this.steps;
+    }
+
+    finish() {
+        let id = this.endNode;
+        let path = [];
+
+        do {
+            const node = this.closed[id];
+            path.push({ id: id, type: 'path' });
+            id = node.parent;
+        } while (id);
+
+        path = path.reverse();
+        this.steps = this.steps.concat(path);
+    }
+
+    getNodeNeighbours(node: any) {
+        const ids: Array<string> = [
+            `${node.x+1}_${node.y}`,
+            `${node.x-1}_${node.y}`,
+            `${node.x}_${node.y+1}`,
+            `${node.x}_${node.y-1}`,
+        ];
+
+        const neighbours: Array<any> = [];
+
+        for (const id of ids) {
+            if (!this.isValidId(id)) continue;
+            neighbours.push(this.closed[id]);
+        }
+
+        return neighbours;
+    }
+
+    findBestNode() {
+        let minValue: number = Infinity;
+        let minNode: DijkstraNode = null;
+
+        for (const id in this.open) {
+            if (!this.open.hasOwnProperty(id)) throw new Error(`Element with ID ${id} is not in the open list.`);
+            
+            const node = this.open[id];
+            if (node.g > minValue) continue;
+
+            minValue = node.g;
+            minNode = node;
+        }
+
+        this.visitNode(minNode);
+        return minNode;
+    }
+
+    visitNode(node: DijkstraNode) {
+        this.closed[node.id] = node;
+        this.steps.push({id: node.id, type: 'visited'});
+    }
+}
+
 class AStar extends Algorithm {
     startNode: AStarNode;
     endNode: AStarNode;
@@ -237,7 +352,7 @@ class AStar extends Algorithm {
     ttc: number; // Time To Complete
 
     constructor(maze: object, start: string, end: string) {
-        super(maze, start);
+        super(maze, start, end);
         this.endNode = new AStarNode(end, 1, 0, null);
         this.startNode = new AStarNode(start, 0, 0, null);
     }
@@ -302,7 +417,7 @@ class AStar extends Algorithm {
             node: null,
         };
 
-        for (const id of Object.keys(this.open)) {
+        for (const id in this.open) {
             const node = this.open[id];
             if (node.f < bestNode.bestF || // F is lower
                (node.f === bestNode.bestF && node.h < bestNode.bestH)) { // or F is equal and H is lower
@@ -350,14 +465,29 @@ class AStar extends Algorithm {
 window.onload = () => {
     const maze: Maze = new Maze();
     const start: HTMLElement = document.getElementById('start-btn');
+    const clear: HTMLElement = document.getElementById('clear-btn');
     start.addEventListener('click', visualize);
+    clear.addEventListener('click', clearCanvas);
 
-    function visualize(e: Event) {
+    function clearCanvas() {
+        const nodes = document.getElementsByClassName('maze-node');
+        for (let i=0; i<nodes.length-1; i++) {
+            const type = nodes[i].getAttribute('type');
+            if (['start', 'end', 'wall'].indexOf(type) === -1) {
+                nodes[i].setAttribute('type', 'unknown');
+            }
+        }
+    }
+
+    function visualize() {
+        clearCanvas();
         const SA: any = document.getElementById('selected-algorithm');
+        let speed: any = document.getElementById('anim-speed');
+        speed = parseInt(speed.value);
         const alg: any = new maze.algorithm[SA.value](maze.nodes, maze.startNode, maze.endNode);
         const steps: Array<object> = alg.start();
         console.log(alg.ttc + 'ms');
-        steps.forEach(animate(showStep, 50));
+        steps.forEach(animate(showStep, speed));
     }
 };
 
