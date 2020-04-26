@@ -13,6 +13,7 @@ class Maze {
         astar: AStar,
         dijkstra: Dijkstra,
     };
+    weightElem: HTMLElement;
 
     constructor() {
         const _this = this;
@@ -93,6 +94,7 @@ class Maze {
     }
 
     onMouseEnter(e: any) {
+        this.weightElem = e.currentTarget;
         const elem: HTMLTableDataCellElement = e.currentTarget; 
         if (this.mouseDown) {
 
@@ -443,7 +445,7 @@ class AStar extends Algorithm {
 
         for (const id of ids) {
             if (!this.isValidId(id)) continue;
-            neighbours.push(new AStarNode(id, node.g + 1, this.getHeuristic(id), node.id));
+            neighbours.push(new AStarNode(id, node.g + this.maze[id], this.getHeuristic(id), node.id));
         }
 
         return neighbours;
@@ -489,6 +491,14 @@ window.onload = () => {
         console.log(alg.ttc + 'ms');
         steps.forEach(animate(showStep, speed));
     }
+
+    /* Listen for weight pressed */
+    document.addEventListener('keypress', (e: any) => {
+        if (isNaN(e.key) || e.key === "0") return;       
+        const nodeId: string = maze.weightElem.getAttribute('nodeid');
+        maze.nodes[nodeId] = parseInt(e.key);
+        maze.weightElem.getElementsByTagName('span')[0].textContent = e.key === "1" ? '' : e.key;
+    });
 };
 
 function showStep(step: any) {

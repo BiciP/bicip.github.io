@@ -85,6 +85,7 @@ var Maze = /** @class */ (function () {
         this.movingEndNode = false;
     };
     Maze.prototype.onMouseEnter = function (e) {
+        this.weightElem = e.currentTarget;
         var elem = e.currentTarget;
         if (this.mouseDown) {
             var id = elem.getAttribute('nodeid');
@@ -389,7 +390,7 @@ var AStar = /** @class */ (function (_super) {
             var id = ids_3[_i];
             if (!this.isValidId(id))
                 continue;
-            neighbours.push(new AStarNode(id, node.g + 1, this.getHeuristic(id), node.id));
+            neighbours.push(new AStarNode(id, node.g + this.maze[id], this.getHeuristic(id), node.id));
         }
         return neighbours;
     };
@@ -429,6 +430,14 @@ window.onload = function () {
         console.log(alg.ttc + 'ms');
         steps.forEach(animate(showStep, speed));
     }
+    /* Listen for weight pressed */
+    document.addEventListener('keypress', function (e) {
+        if (isNaN(e.key) || e.key === "0")
+            return;
+        var nodeId = maze.weightElem.getAttribute('nodeid');
+        maze.nodes[nodeId] = parseInt(e.key);
+        maze.weightElem.getElementsByTagName('span')[0].textContent = e.key === "1" ? '' : e.key;
+    });
 };
 function showStep(step) {
     var node = document.querySelector("[nodeid=\"" + step.id + "\"]");
