@@ -416,10 +416,12 @@ window.onload = function () {
     var clear = document.getElementById('clear-btn');
     var genWeightsBtn = document.getElementById('genWeights-btn');
     var clearWeightsBtn = document.getElementById('clearWeights-btn');
+    var clearWallsBtn = document.getElementById('clearWalls-btn');
     start.addEventListener('click', visualize);
     clear.addEventListener('click', clearCanvas);
     genWeightsBtn.addEventListener('click', generateWeights);
     clearWeightsBtn.addEventListener('click', clearWeights);
+    clearWallsBtn.addEventListener('click', clearWalls);
     function clearCanvas() {
         var nodes = document.getElementsByClassName('maze-node');
         for (var i = 0; i < nodes.length; i++) {
@@ -458,6 +460,15 @@ window.onload = function () {
                 var span = node.getElementsByTagName('span')[0];
                 maze.nodes[id] = 1;
                 span.textContent = '';
+            }
+        }
+    }
+    function clearWalls() {
+        for (var id in maze.nodes) {
+            if (!maze.nodes[id]) {
+                var node = document.querySelector("[nodeid=\"" + id + "\"]");
+                node.setAttribute('type', 'unknown');
+                maze.nodes[id] = 1;
             }
         }
     }

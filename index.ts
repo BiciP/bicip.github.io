@@ -475,11 +475,13 @@ window.onload = () => {
     const clear: HTMLElement = document.getElementById('clear-btn');
     const genWeightsBtn: HTMLElement = document.getElementById('genWeights-btn');
     const clearWeightsBtn: HTMLElement = document.getElementById('clearWeights-btn');
+    const clearWallsBtn: HTMLElement = document.getElementById('clearWalls-btn');
 
     start.addEventListener('click', visualize);
     clear.addEventListener('click', clearCanvas);
     genWeightsBtn.addEventListener('click', generateWeights);
     clearWeightsBtn.addEventListener('click', clearWeights);
+    clearWallsBtn.addEventListener('click', clearWalls);
 
     function clearCanvas() {
         const nodes = document.getElementsByClassName('maze-node');
@@ -521,6 +523,16 @@ window.onload = () => {
                 const span: HTMLElement = node.getElementsByTagName('span')[0];
                 maze.nodes[id] = 1;
                 span.textContent = '';
+            }
+        }
+    }
+
+    function clearWalls() {
+        for (const id in maze.nodes) {
+            if (!maze.nodes[id]) {
+                const node: HTMLElement = document.querySelector(`[nodeid="${id}"]`);
+                node.setAttribute('type', 'unknown');
+                maze.nodes[id] = 1;
             }
         }
     }
