@@ -177,6 +177,7 @@ var AStarNode = /** @class */ (function (_super) {
 var Algorithm = /** @class */ (function () {
     function Algorithm(maze, start, end) {
         this.steps = [];
+        this.pathLength = 0;
         this.maze = maze;
         this.startNode = start;
         this.endNode = end;
@@ -259,6 +260,7 @@ var Dijkstra = /** @class */ (function (_super) {
         var path = [];
         do {
             var node = this.closed[id];
+            this.pathLength += this.maze[id];
             path.push({ id: id, type: 'path' });
             id = node.parent;
         } while (id);
@@ -339,7 +341,9 @@ var AStar = /** @class */ (function (_super) {
                     // We've seen this node...
                     this.seeNode(n);
                 }
-                else if (!this.closed[n.id] || this.closed[n.id].f > n.f) {
+                else if (!this.closed[n.id] ||
+                    this.closed[n.id].f > n.f ||
+                    n.f === this.closed[n.id].f && (n.g <= this.closed[n.id].g)) {
                     // We've seen the node and added it to open list
                     this.seeNode(n);
                     this.open[n.id] = n;
@@ -354,6 +358,7 @@ var AStar = /** @class */ (function (_super) {
         var path = [];
         do {
             var node = this.closed[id];
+            this.pathLength += this.maze[id];
             path.push({ id: id, type: 'path' });
             id = node.parent;
         } while (id);
@@ -369,7 +374,7 @@ var AStar = /** @class */ (function (_super) {
         for (var id in this.open) {
             var node = this.open[id];
             if (node.f < bestNode.bestF || // F is lower
-                (node.f === bestNode.bestF && node.h < bestNode.bestH)) { // or F is equal and H is lower
+                (node.f === bestNode.bestF && node.h <= bestNode.bestH)) { // or F is equal and H is lower
                 bestNode.bestF = node.f;
                 bestNode.bestH = node.h;
                 bestNode.node = node;
@@ -409,8 +414,12 @@ window.onload = function () {
     var maze = new Maze();
     var start = document.getElementById('start-btn');
     var clear = document.getElementById('clear-btn');
+    var genWeightsBtn = document.getElementById('genWeights-btn');
+    var clearWeightsBtn = document.getElementById('clearWeights-btn');
     start.addEventListener('click', visualize);
     clear.addEventListener('click', clearCanvas);
+    genWeightsBtn.addEventListener('click', generateWeights);
+    clearWeightsBtn.addEventListener('click', clearWeights);
     function clearCanvas() {
         var nodes = document.getElementsByClassName('maze-node');
         for (var i = 0; i < nodes.length; i++) {
@@ -428,7 +437,29 @@ window.onload = function () {
         var alg = new maze.algorithm[SA.value](maze.nodes, maze.startNode, maze.endNode);
         var steps = alg.start();
         console.log(alg.ttc + 'ms');
+        console.log('Path length: ' + alg.pathLength);
         steps.forEach(animate(showStep, speed));
+    }
+    function generateWeights() {
+        for (var id in maze.nodes) {
+            if (id === maze.startNode || id === maze.endNode || !maze.nodes[id])
+                continue;
+            var weight = Math.floor(Math.random() * 9) + 1;
+            var node = document.querySelector("[nodeid=\"" + id + "\"]");
+            var span = node.getElementsByTagName('span')[0];
+            maze.nodes[id] = weight;
+            span.textContent = weight === 1 ? '' : "" + weight;
+        }
+    }
+    function clearWeights() {
+        for (var id in maze.nodes) {
+            if (maze.nodes[id]) {
+                var node = document.querySelector("[nodeid=\"" + id + "\"]");
+                var span = node.getElementsByTagName('span')[0];
+                maze.nodes[id] = 1;
+                span.textContent = '';
+            }
+        }
     }
     /* Listen for weight pressed */
     document.addEventListener('keypress', function (e) {
