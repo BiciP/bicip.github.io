@@ -388,9 +388,7 @@ class AStar extends Algorithm {
                 } else if (this.open[n.id] && this.open[n.id].f < n.f) {
                     // We've seen this node...
                     this.seeNode(n);
-                } else if (!this.closed[n.id] ||
-                           this.closed[n.id].f > n.f || 
-                           n.f === this.closed[n.id].f && (n.g <= this.closed[n.id].g)) {
+                } else if (!this.closed[n.id] || this.closed[n.id].f > n.f) {
                     // We've seen the node and added it to open list
                     this.seeNode(n);
                     this.open[n.id] = n;
@@ -476,6 +474,9 @@ window.onload = () => {
     const genWeightsBtn: HTMLElement = document.getElementById('genWeights-btn');
     const clearWeightsBtn: HTMLElement = document.getElementById('clearWeights-btn');
     const clearWallsBtn: HTMLElement = document.getElementById('clearWalls-btn');
+    const ttcParagraph: HTMLElement = document.getElementById('ttc');
+    const pathLengthPara: HTMLElement = document.getElementById('path-length');
+    const algInfo: any = document.getElementsByClassName('algorithm-info')[0];
 
     start.addEventListener('click', visualize);
     clear.addEventListener('click', clearCanvas);
@@ -502,6 +503,9 @@ window.onload = () => {
         const steps: Array<object> = alg.start();
         console.log(alg.ttc + 'ms');
         console.log('Path length: ' + alg.pathLength);
+        ttcParagraph.textContent = alg.ttc;
+        pathLengthPara.textContent = alg.pathLength;
+        algInfo.style.display = 'flex';
         steps.forEach(animate(showStep, speed));
     }
 

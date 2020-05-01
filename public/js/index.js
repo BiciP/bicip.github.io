@@ -341,9 +341,7 @@ var AStar = /** @class */ (function (_super) {
                     // We've seen this node...
                     this.seeNode(n);
                 }
-                else if (!this.closed[n.id] ||
-                    this.closed[n.id].f > n.f ||
-                    n.f === this.closed[n.id].f && (n.g <= this.closed[n.id].g)) {
+                else if (!this.closed[n.id] || this.closed[n.id].f > n.f) {
                     // We've seen the node and added it to open list
                     this.seeNode(n);
                     this.open[n.id] = n;
@@ -417,6 +415,9 @@ window.onload = function () {
     var genWeightsBtn = document.getElementById('genWeights-btn');
     var clearWeightsBtn = document.getElementById('clearWeights-btn');
     var clearWallsBtn = document.getElementById('clearWalls-btn');
+    var ttcParagraph = document.getElementById('ttc');
+    var pathLengthPara = document.getElementById('path-length');
+    var algInfo = document.getElementsByClassName('algorithm-info')[0];
     start.addEventListener('click', visualize);
     clear.addEventListener('click', clearCanvas);
     genWeightsBtn.addEventListener('click', generateWeights);
@@ -440,6 +441,9 @@ window.onload = function () {
         var steps = alg.start();
         console.log(alg.ttc + 'ms');
         console.log('Path length: ' + alg.pathLength);
+        ttcParagraph.textContent = alg.ttc;
+        pathLengthPara.textContent = alg.pathLength;
+        algInfo.style.display = 'flex';
         steps.forEach(animate(showStep, speed));
     }
     function generateWeights() {

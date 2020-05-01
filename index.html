@@ -24,26 +24,38 @@
     <script src="public/js/index.js"></script>
 </head>
 <body>
-    <button id="start-btn">Start</button>
-    <button id="clear-btn">Clear</button>
-    <select id="selected-algorithm">
-        <option value="astar">A*</option>
-        <option value="dijkstra">Dijkstra</option>
-    </select>
-    <select id="anim-speed">
-        <option value="0">Very Fast</option>
-        <option value="20" selected>Fast</option>
-        <option value="100">Medium</option>
-        <option value="200">Slow</option>
-        <option value="500">Very Slow</option>
-    </select>
+
+    <nav>
+        <button id="start-btn">START</button>
+        <button id="clear-btn">CLEAR</button>
+        <select id="selected-algorithm">
+            <option value="astar">A*</option>
+            <option value="dijkstra">Dijkstra</option>
+        </select>
+        <select id="anim-speed">
+            <option value="0">Very Fast</option>
+            <option value="10" selected>Fast</option>
+            <option value="80">Medium</option>
+            <option value="160">Slow</option>
+            <option value="320">Very Slow</option>
+        </select>
+        
+        <button id="genWeights-btn">Generate Weights</button>
+        <button id="clearWeights-btn">Clear Weights</button>
+        <button id="clearWalls-btn">Clear Walls</button>
     
-    <button id="genWeights-btn">Generate Weights</button>
-    <button id="clearWeights-btn">Clear Weights</button>
-    <button id="clearWalls-btn">Clear Walls</button>
+        <a href="https://github.com/bicip/bicip.github.io" target="blank">GitHub</a>
+    </nav>
     
-    <div class="maze-container">
-        <table id="maze-canvas"></table>
+    <div class="app-wrapper">
+        <div class="maze-container">
+            <table id="maze-canvas"></table>
+        </div>
+    </div>
+
+    <div class="algorithm-info">
+        <p class="time-to-finish">Time to complete: <span id="ttc"></span>ms</p>
+        <p class="path-length">Path length: <span id="path-length"></span></p>
     </div>
 </body>
 </html>
